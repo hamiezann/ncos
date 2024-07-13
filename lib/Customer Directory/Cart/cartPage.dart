@@ -23,7 +23,9 @@ class _CartPageState extends State<CartPage> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   bool paymentFailed = false;
   bool paymentSuccessful = false;
-
+  String deliveryAddress = '';
+  String orderType = 'dine_in';
+  String orderAddress = 'Dine In: Table 1';
 
   @override
   void initState() {
@@ -88,26 +90,57 @@ class _CartPageState extends State<CartPage> {
     super.dispose();
   }
 
+
+  void handleOrderDetailsChanged(String newOrderType, String newOrderAddress) {
+    setState(() {
+      orderType = newOrderType;
+      orderAddress = newOrderAddress;
+    });
+  }
+
   Future<void> sendPaymentDataToServer(Map<String, dynamic> paymentDetails) async {
     try {
-      var apiUrl = '${Config.apiUrl}/api/handle-payment-success';
+      var apiUrl = '${Config.apiUrl}/handle-payment-success';
       int? userId = await getUserId();
+
+      // Print the entire paymentDetails object
+      print('Payment Details: $paymentDetails');
+
+      // Access transactions correctly
+      var transactions = paymentDetails['data']?['transactions'];
+      // Print the transactions object
+      print('Transactions: $transactions');
+
+      var totalAmount = transactions != null && transactions.isNotEmpty
+          ? transactions[0]['amount']['total']
+          : null;
+
+      if (totalAmount == null) {
+        throw Exception('Total amount is null or transactions list is empty');
+      }
+
+      var requestBody = <String, dynamic>{
+        'items': cartItems.map((item) => {
+          'name': item.name,
+          'quantity': item.quantity,
+          'price': item.price,
+        }).toList(),
+        'totalAmount': totalAmount,
+        'userID': userId,
+        'paymentId': paymentDetails['data']?['id'],
+        'orderAddress': orderAddress,
+      };
+
+      // Print the request body
+      print('Request Body: $requestBody');
+
       var response = await http.post(
-        Uri.parse(apiUrl),
+        // Uri.parse(apiUrl),
+        Uri.parse('${Config.apiUrl}/handle-payment-success'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, dynamic>{
-          'items': cartItems.map((item) => {
-            'name': item.name,
-            'quantity': item.quantity,
-            'price': item.price,
-          }).toList(),
-          'totalAmount': paymentDetails['transactions'][0]['amount']['total'],
-          'userID': userId,
-          'paymentId': paymentDetails['id'], // Ensure paymentId is passed
-          'orderAddress': 'dummy address', // Include order address if applicable
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
@@ -130,7 +163,6 @@ class _CartPageState extends State<CartPage> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +232,9 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                AddressSection(),
+                AddressSection(
+                  onOrderDetailsChanged: handleOrderDetailsChanged,
+                ),
                 SizedBox(height: 20),
                 SummarySection(cartItems: cartItems),
                 SizedBox(height: 20),
@@ -255,6 +289,7 @@ class _CartPageState extends State<CartPage> {
                             setState(() {
                               paymentSuccessful = true;
                             });
+                            print(params.cast<String, dynamic>());
                             await sendPaymentDataToServer(params.cast<String, dynamic>());
                           },
 
@@ -370,13 +405,17 @@ class CartItemCard extends StatelessWidget {
 }
 
 class AddressSection extends StatefulWidget {
+  final Function(String, String) onOrderDetailsChanged; // Callback function
+
+  AddressSection({required this.onOrderDetailsChanged});
+
   @override
   _AddressSectionState createState() => _AddressSectionState();
 }
 
 class _AddressSectionState extends State<AddressSection> {
   String orderType = 'dine_in'; // Default to pickup
-  String orderAddress = '140 Roadway Ave.'; // Example default address
+  String orderAddress = 'Dine In: Table 1'; // Example default address
   String tableNumber = ''; // Variable to store table number for dine-in
 
   @override
@@ -414,16 +453,12 @@ class _AddressSectionState extends State<AddressSection> {
                 onChanged: (value) {
                   setState(() {
                     orderType = value!;
+                    updateOrderAddress();
+                    widget.onOrderDetailsChanged(orderType, orderAddress);
                   });
                 },
               ),
               Spacer(),
-              // IconButton(
-              //   icon: Icon(Icons.edit),
-              //   onPressed: () {
-              //     // Handle editing logic here
-              //   },
-              // ),
             ],
           ),
           if (orderType == 'delivery') ...[
@@ -435,7 +470,8 @@ class _AddressSectionState extends State<AddressSection> {
               ),
               onChanged: (value) {
                 setState(() {
-                  orderAddress = value;
+                  orderAddress = 'Delivery: $value';
+                  widget.onOrderDetailsChanged(orderType, orderAddress);
                 });
               },
             ),
@@ -449,6 +485,8 @@ class _AddressSectionState extends State<AddressSection> {
               onChanged: (value) {
                 setState(() {
                   tableNumber = value;
+                  orderAddress = 'Dine In: Table $value';
+                  widget.onOrderDetailsChanged(orderType, orderAddress);
                 });
               },
             ),
@@ -461,30 +499,24 @@ class _AddressSectionState extends State<AddressSection> {
                 color: Colors.black,
               ),
             ),
+            // setState(() {
+            //   orderAddress = 'Pickup';
+            //   widget.onOrderDetailsChanged(orderType, orderAddress);
+            // }),
           ],
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(Icons.timer),
-              SizedBox(width: 10),
-              Text('25-30 min (ASAP)'),
-              Spacer(),
-              // Icon(Icons.edit),
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(Icons.attach_money),
-              SizedBox(width: 10),
-              Text('Bank Transfer'),
-              Spacer(),
-              // Icon(Icons.edit),
-            ],
-          ),
         ],
       ),
     );
+  }
+
+  void updateOrderAddress() {
+    if (orderType == 'pickup') {
+      orderAddress = 'Pickup';
+    } else if (orderType == 'dine_in') {
+      orderAddress = 'Dine In: Table $tableNumber';
+    } else if (orderType == 'delivery') {
+      orderAddress = 'Delivery: $orderAddress';
+    }
   }
 }
 

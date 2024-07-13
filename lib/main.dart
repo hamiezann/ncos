@@ -92,6 +92,7 @@ class MyApp extends StatelessWidget {
         'cart': (context) => CartPage(),
         '/payment-success': (context) => PaymentSuccessPage(),
         '/payment-cancel': (context) => PaymentFailedPage(),
+        // '/orderDetails': (context) => OrderDetailsPage(order: order),
         // '/menu': (context) => MenuPage(),
       },
     );

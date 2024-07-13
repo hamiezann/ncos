@@ -24,11 +24,12 @@ class PaymentFailedPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to another screen, or close the failed screen
-                Navigator.pop(context);
+                // Navigate to home screen and clear all previous routes
+                Navigator.pushNamedAndRemoveUntil(context, 'cart', (route) => false);
               },
-              child: Text('Try Again'),
+              child: Text('Back to Cart', style: TextStyle(color: Colors.black)),
             ),
+
           ],
         ),
       ),

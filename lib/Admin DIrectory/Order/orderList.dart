@@ -80,8 +80,8 @@ class _OrdersPageState extends State<OrdersPage> {
   List<Order> filterOrders(List<Order> orders) {
     if (filter == 'All') {
       return orders;
-    } else if (filter == 'Pending') {
-      return orders.where((order) => order.orderStatus == 'Pending' || order.orderStatus == 'Delayed').toList();
+    } else if (filter == 'Preparing') {
+      return orders.where((order) => order.orderStatus == 'Preparing' || order.orderStatus == 'Delayed').toList();
     } else {
       return orders.where((order) => order.orderStatus == filter).toList();
     }
@@ -122,11 +122,11 @@ class _OrdersPageState extends State<OrdersPage> {
                       },
                     ),
                     FilterButton(
-                      text: 'Pending',
-                      isSelected: filter == 'Pending',
+                      text: 'Preparing',
+                      isSelected: filter == 'Preparing',
                       onPressed: () {
                         setState(() {
-                          filter = 'Pending';
+                          filter = 'Preparing';
                         });
                       },
                     ),
@@ -221,7 +221,7 @@ class OrderCard extends StatelessWidget {
           title: Text('Update Order Status'),
           content: DropdownButtonFormField<String>(
             value: selectedStatus,
-            items: ['Pending', 'Delayed', 'Completed'].map((String status) {
+            items: ['Preparing', 'Delayed', 'Completed'].map((String status) {
               return DropdownMenuItem<String>(
                 value: status,
                 child: Text(status),
@@ -235,13 +235,13 @@ class OrderCard extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Colors.black),),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Update'),
+              child: Text('Update', style: TextStyle(color: Colors.black)),
               onPressed: () {
                 onUpdateStatus(selectedStatus);
                 Navigator.of(context).pop();
@@ -274,7 +274,7 @@ class OrderCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     color: order.orderStatus == 'Completed'
                         ? Colors.green
-                        : order.orderStatus == 'Pending'
+                        : order.orderStatus == 'Preparing'
                         ? Colors.yellow.shade800
                         : Colors.red,  // Default to red for 'Delayed' and any other status
                   ),
@@ -335,7 +335,7 @@ class OrderCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                if (order.orderStatus == 'Pending' || order.orderStatus == 'Delayed')
+                if (order.orderStatus == 'Preparing' || order.orderStatus == 'Delayed')
                   ElevatedButton(
                     onPressed: () => _showUpdateOrderModal(context),
                     child: Text(

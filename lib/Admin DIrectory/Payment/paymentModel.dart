@@ -5,7 +5,7 @@ class Payment {
   final int id;
   final double totalPrice;
   final String paymentMethod;
-  final int transactionId;
+  final String transactionId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<Order> orders;
@@ -27,7 +27,7 @@ class Payment {
       id: json['id'] ?? 0,
       totalPrice: json['total_price'] != null ? double.parse(json['total_price'].toString()) : 0.0,
       paymentMethod: json['payment_method'] ?? '',
-      transactionId: json['transaction_id'] ?? 0,
+      transactionId: json['transaction_id'] ?? '',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
       orders: (json['orders'] as List?)

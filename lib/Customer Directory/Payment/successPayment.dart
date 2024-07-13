@@ -24,11 +24,12 @@ class PaymentSuccessPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to another screen, or close the success screen
-                Navigator.pop(context);
+                // Navigate to home screen and clear all previous routes
+                Navigator.pushNamedAndRemoveUntil(context, '/customer-home', (route) => false);
               },
-              child: Text('Back to Home'),
+              child: Text('Back to Home', style: TextStyle(color: Colors.black)),
             ),
+
           ],
         ),
       ),
