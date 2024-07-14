@@ -18,31 +18,55 @@ class OrderDetailsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restaurant: ${order.restaurantName}',
+              'Order Status: ${order.orderStatus}',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text('Order Date: ${order.orderDate}'),
             SizedBox(height: 8),
-            Text('Rating: ${order.orderRate} stars'),
+            // Text('Rating: ${order.orderRate} stars'),
             SizedBox(height: 8),
-            Text('Products: ${order.productCount}'),
+            Text('Products: ${order.products}'),
             SizedBox(height: 8),
-            Text('Total Price: \$${order.orderPrice.toStringAsFixed(2)}'),
+            Text('Total Price: \RM${order.orderPrice.toStringAsFixed(2)}'),
             SizedBox(height: 16),
             Text(
               'Products:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
+            SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
                 itemCount: order.products.length,
                 itemBuilder: (context, index) {
                   final product = order.products[index];
-                  return ListTile(
-                    title: Text(product.productName),
-                    subtitle: Text(product.description),
-                    trailing: Text('\$${product.price.toStringAsFixed(2)}'),
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Image.network(
+                        product.image,
+
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(product.productName),
+                      subtitle: Text(product.description),
+                      trailing: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\RM${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Rating: ${product.rating}',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),

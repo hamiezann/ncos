@@ -105,6 +105,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.red,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: TextStyle(color: Colors.white),
+        unselectedLabelStyle: TextStyle(color: Colors.grey),
+        currentIndex: 3,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -126,26 +132,19 @@ class _MyProfilePageState extends State<MyProfilePage> {
         onTap: (int index) {
           switch (index) {
             case 0:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CustomerHomePage()), // Navigate to CustomerHomePage
-              );
+              Navigator.pushReplacementNamed(context, '/customer-home'); // Navigate to CustomerHomePage
               break;
             case 1:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MapScreen()),
-              );
+              Navigator.pushReplacementNamed(context, '/map');
               break;
             case 2:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => OrdersHistoryPage()), // Navigate to OrdersHistoryPage
-              );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => OrdersHistoryPage()), // Navigate to OrdersHistoryPage
+            );
               break;
             case 3:
-              Navigator.pushNamed(
-                  context, '/profile'); // Navigate to profile page
+             // Navigator.pushReplacementNamed(context, '/profile'); // Navigate to profile page
               break;
           }
         },

@@ -7,14 +7,37 @@ import 'Cart/cartPage.dart';
 import 'Maps/map.dart';
 import 'Menu/menuList.dart';
 
-
 class CustomerHomePage extends StatefulWidget {
   @override
   _CustomerHomePageState createState() => _CustomerHomePageState();
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  Future<void> _logout(BuildContext context) async {
+  late Future<Map<String, dynamic>> _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = fetchData();
+  }
+
+  Future<Map<String, dynamic>> fetchData() async {
+    final categoriesResponse = await http
+        .get(Uri.parse('${Config.apiUrl}/category-list'));
+    final productsResponse =
+    await http.get(Uri.parse('${Config.apiUrl}/product-list'));
+
+    if (categoriesResponse.statusCode == 200 &&
+        productsResponse.statusCode == 200) {
+      final categories = json.decode(categoriesResponse.body);
+      final products = json.decode(productsResponse.body);
+      return {'categories': categories, 'products': products};
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  void _logout(BuildContext context) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
@@ -46,58 +69,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     }
   }
 
-  late Future<Map<String, dynamic>> _data;
-
-  @override
-  void initState() {
-    super.initState();
-    _data = fetchData();
-  }
-
-  Future<Map<String, dynamic>> fetchData() async {
-    final categoriesResponse = await http
-        .get(Uri.parse('${Config.apiUrl}/category-list'));
-    final productsResponse =
-    await http.get(Uri.parse('${Config.apiUrl}/product-list'));
-
-    if (categoriesResponse.statusCode == 200 &&
-        productsResponse.statusCode == 200) {
-      final categories = json.decode(categoriesResponse.body);
-      final products = json.decode(productsResponse.body);
-      return {'categories': categories, 'products': products};
-    } else {
-      throw Exception('Failed to load data');
-    }
-  }
-
-  void _viewAllProducts(BuildContext context, int categoryId,
-      String categoryName, List<dynamic> products) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MenuPage(
-          categoryId: categoryId,
-          categoryName: categoryName,
-        ),
-      ),
-    );
-  }
-
-  // void _goToCartPage(BuildContext context) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => CartPage(
-  //         imageUrl: 'https://via.placeholder.com/100',
-  //         title: 'Sample Product',
-  //         subtitle: 'Sample Product Description',
-  //         price: '\$10.00',
-  //         quantity: 1,
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +76,18 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black, width: 1.0),
+            ),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(30.0),
+                child: Image.asset('assets/logo.jpeg',)),
+          ),  // Path to your logo image
+        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -117,7 +100,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 ),
                 Text(
                   'Welcome',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold,  color: Colors.white),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
               ],
             ),
@@ -126,10 +112,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 IconButton(
                   icon: Icon(Icons.shopping_cart_outlined, color: Colors.white),
                   onPressed: () {
-                    // _goToCartPage(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CartPage()), // Navigate to CustomerHomePage
+                      MaterialPageRoute(builder: (context) => CartPage()),
                     );
                   },
                 ),
@@ -143,81 +128,28 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 16),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Share Happiness',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Buy 1 Get 1',
-                            style: TextStyle(fontSize: 16, color: Colors.pink),
-                          ),
-                          SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Handle find out more button press
-                            },
-                            child: Text('Find out more'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange, // Orange theme
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Spacer(),
-                      Image.network(
-                        'https://via.placeholder.com/100',
-                        // Replace with actual image URL
-                        width: 100,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                FutureBuilder<Map<String, dynamic>>(
-                  future: _data,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Failed to load data'));
-                    } else {
-                      final categories = snapshot.data?['categories'] ?? [];
-                      final products = snapshot.data?['products'] ?? [];
-                      return _buildCategorySection(
-                          context, categories, products);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _data,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Failed to load data'));
+            } else {
+              return CustomerHomePageContent(
+                categories: snapshot.data?['categories'] ?? [],
+                products: snapshot.data?['products'] ?? [],
+              );
+            }
+          },
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.red,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: TextStyle(color: Colors.white),
+        unselectedLabelStyle: TextStyle(color: Colors.grey),
         currentIndex: 0,
         items: [
           BottomNavigationBarItem(
@@ -226,7 +158,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.location_on),
-            label: 'Map',
+            label: 'Location',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
@@ -238,29 +170,120 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           ),
         ],
         onTap: (int index) {
+          // Handle navigation to different pages
           switch (index) {
             case 0:
             // Navigate to home page if necessary
               break;
             case 1:
-              Navigator.pushReplacementNamed(
-                  context,
-                  // MaterialPageRoute(builder: (context) => MapScreen()),
-                  '/map'
-              );
+              Navigator.pushReplacementNamed(context, '/map');
               break;
             case 2:
-              Navigator.pushReplacementNamed(
-                  context,
-                  '/order-history'
-                // MaterialPageRoute(builder: (context) => OrdersHistoryPage()),
-              ); // Navigate to OrdersPage
+              Navigator.pushNamed(context, '/order-history');
               break;
             case 3:
-              Navigator.pushReplacementNamed(context, '/profile'); // Navigate to profile page
+              Navigator.pushNamed(context, '/profile');
               break;
           }
         },
+      ),
+    );
+  }
+}
+
+class CustomerHomePageContent extends StatelessWidget {
+  final List<dynamic> categories;
+  final List<dynamic> products;
+
+  CustomerHomePageContent({
+    required this.categories,
+    required this.products,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: 0, // Set initial index for the content
+      children: [
+        HomeContent(categories: categories, products: products),
+        MapScreen(),
+        // Add more pages as needed
+        // OrdersPage(),
+        // ProfilePage(),
+      ],
+    );
+  }
+}
+
+class HomeContent extends StatelessWidget {
+  final List<dynamic> categories;
+  final List<dynamic> products;
+
+  HomeContent({
+    required this.categories,
+    required this.products,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Share Happiness',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Buy 1 Get 1',
+                        style: TextStyle(fontSize: 16, color: Colors.pink),
+                      ),
+                      SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle find out more button press
+                        },
+                        child: Text('Find out more'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                          Colors.orange, // Orange theme
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Image.asset(
+                    'assets/menu4.jpg',
+                    // Replace with actual image URL
+                    width: 100,
+                  ),
+
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            _buildCategorySection(context, categories, products),
+          ],
+        ),
       ),
     );
   }
@@ -354,6 +377,19 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _viewAllProducts(BuildContext context, int categoryId,
+      String categoryName, List<dynamic> products) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MenuPage(
+          categoryId: categoryId,
+          categoryName: categoryName,
         ),
       ),
     );

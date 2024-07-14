@@ -12,7 +12,8 @@ class OrdersHistoryPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Orders'),
+          backgroundColor: Colors.grey,
+          title: Text('Orders', style: TextStyle(color: Colors.white),),
           bottom: TabBar(
             tabs: [
               Tab(text: 'Past Orders'),
@@ -39,6 +40,12 @@ class OrdersHistoryPage extends StatelessWidget {
           },
         ),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.red,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: TextStyle(color: Colors.white),
+          unselectedLabelStyle: TextStyle(color: Colors.grey),
+          currentIndex: 2,
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -46,7 +53,7 @@ class OrdersHistoryPage extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.location_on),
-              label: 'Map',
+              label: 'Location',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.history),
@@ -60,19 +67,23 @@ class OrdersHistoryPage extends StatelessWidget {
           onTap: (int index) {
             switch (index) {
               case 0:
-                Navigator.pushNamed(context, '/home');
+                Navigator.pushReplacementNamed(context, '/customer-home'); // Navigate to CustomerHomePage
                 break;
               case 1:
-                Navigator.pushNamed(context, '/map');
+              Navigator.pushReplacementNamed(context, '/map');
                 break;
               case 2:
-                Navigator.pushNamed(context, '/orders');
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => OrdersHistoryPage()), // Navigate to OrdersHistoryPage
+                // );
                 break;
               case 3:
-                Navigator.pushNamed(context, '/profile');
+                Navigator.pushReplacementNamed(context, '/profile'); // Navigate to profile page
                 break;
             }
           },
+
         ),
       ),
     );

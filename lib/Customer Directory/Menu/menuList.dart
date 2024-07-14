@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:ncos/Customer%20Directory/Menu/menuDetails.dart';
 
 import '../../Network Configuration/networkConfig.dart';
 import '../Cart/cartModel.dart';
@@ -60,10 +61,10 @@ class _MenuPageState extends State<MenuPage> {
             shrinkWrap: true, // Added to prevent GridView from taking infinite height
             physics: NeverScrollableScrollPhysics(), // Disable GridView's scrolling
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Number of columns in the grid
+              crossAxisCount: 1, // Number of columns in the grid
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 12.0,
-              childAspectRatio: 0.55, // Aspect ratio of the items
+              // childAspectRatio: 0.55, // Aspect ratio of the items
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {
@@ -90,7 +91,7 @@ class _ProductCardState extends State<ProductCard> {
   int quantity = 0;
   final CartService _cartService = CartService();
 
-  void _showSnackbar(String message) {
+  void _showSnackbar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Center(
@@ -107,96 +108,103 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.grey[900], // Set card background color to dark grey (simulating black)
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
-            child: Image.network(
-              '${widget.product['image']}',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 140, // Adjust height as needed
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MenuDetailsPage(product: widget.product)),
+        );
+      },
+      child: Card(
+        color: Colors.grey[900], // Set card background color to dark grey (simulating black)
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
+              child: Image.network(
+                '${widget.product['image']}',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 140, // Adjust height as needed
+              ),
             ),
-          ),
-          SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.all(8.0), // Reduced padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      widget.product['product_name'] ?? 'Unknown',
-                      style: TextStyle(
-                        fontSize: 14, // Increased font size
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange, // Set text color to orange
+            SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.all(8.0), // Reduced padding
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        widget.product['product_name'] ?? 'Unknown',
+                        style: TextStyle(
+                          fontSize: 14, // Increased font size
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange, // Set text color to orange
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '\RM ${widget.product['price']}',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.white, // Set text color to white
+                      SizedBox(height: 4),
+                      Text(
+                        '\RM ${widget.product['price']}',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white, // Set text color to white
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.product['description'],
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.white, // Set text color to white
+                      Text(
+                        widget.product['description'],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white, // Set text color to white
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                // SizedBox(height: 4),
-                QuantityAdjuster(
-                  quantity: quantity,
-                  onAdd: () {
-                    setState(() {
-                      quantity++;
-                    });
-                  },
-                  onRemove: () {
-                    setState(() {
-                      if (quantity > 0) quantity--;
-                    });
-                  },
-                ),
-                // SizedBox(height: 4),
-                ElevatedButton(
-                  onPressed: () {
-                    final cartItem = CartItem(
-                      id: widget.product['id'],
-                      imageUrl: widget.product['image'],
-                      name: widget.product['product_name'],
-                      price: double.parse(widget.product['price']),
-                      quantity: quantity,
-                    );
-                    _cartService.addToCart(cartItem);
-
-                    // Show Snackbar
-                    _showSnackbar('${widget.product['product_name']} added to cart');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    ],
                   ),
-                  child: Text('Add to Cart'),
-                ),
-              ],
+                  // SizedBox(height: 4),
+                  QuantityAdjuster(
+                    quantity: quantity,
+                    onAdd: () {
+                      setState(() {
+                        quantity++;
+                      });
+                    },
+                    onRemove: () {
+                      setState(() {
+                        if (quantity > 0) quantity--;
+                      });
+                    },
+                  ),
+                  // SizedBox(height: 4),
+                  ElevatedButton(
+                    onPressed: () {
+                      final cartItem = CartItem(
+                        id: widget.product['id'],
+                        imageUrl: widget.product['image'],
+                        name: widget.product['product_name'],
+                        price: double.parse(widget.product['price']),
+                        quantity: quantity,
+                      );
+                      _cartService.addToCart(cartItem);
+                      // Show Snackbar
+                      _showSnackbar(context, '${widget.product['product_name']} added to cart');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                    child: Text('Add to Cart'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

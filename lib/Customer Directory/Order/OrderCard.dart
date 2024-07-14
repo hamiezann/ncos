@@ -30,7 +30,7 @@ class OrderCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                order.restaurantName,
+                order.orderStatus,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -39,22 +39,22 @@ class OrderCard extends StatelessWidget {
               SizedBox(height: 8),
               Text(order.orderDate),
               SizedBox(height: 8),
-              Row(
-                children: List.generate(
-                  5,
-                      (index) => Icon(
-                    index < order.orderRate ? Icons.star : Icons.star_border,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                ),
-              ),
+              // Row(
+              //   children: List.generate(
+              //     5,
+              //         (index) => Icon(
+              //       index < order.products ? Icons.star : Icons.star_border,
+              //       color: Colors.orange,
+              //       size: 20,
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 8),
               Row(
                 children: [
-                  Text('Products: ${order.productCount}'),
+                  Text('Products: ${order.products.length}'),
                   Spacer(),
-                  Text('Order Price: \$${order.orderPrice.toStringAsFixed(2)}'),
+                  Text('Order Price: \RM${order.orderPrice.toStringAsFixed(2)}'),
                 ],
               ),
             ],
